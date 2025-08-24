@@ -1,5 +1,6 @@
 ﻿
 Namespace Models
+    ' Modelo de datos para una cita médica
     Public Class Cita
         Public Property CitaId As Integer
         Public Property PacienteId As Integer
@@ -9,9 +10,12 @@ Namespace Models
         Public Property Motivo As String
         Public Property Estado As String
 
+        ' Constructor vacío
         Public Sub New()
+            MyBase.New()
         End Sub
 
+        ' Constructor con parámetros
         Public Sub New(citaId As Integer, pacienteId As Integer, doctorId As Integer,
                        fechaHora As DateTime, duracion As Integer, motivo As String, estado As String)
             Me.CitaId = citaId

@@ -6,8 +6,10 @@ Imports LoginRoles.Helpers
 Namespace Data
 
     Public Class CitaRepository
+        ' Repositorio para gestionar citas médicas
         Private ReadOnly db As New DatabaseHelper()
 
+        ' Obtener lista de citas según rol:
         Public Function GetList(roleId As Integer, usuarioId As Integer) As DataTable
             If roleId = 2 Then ' Admin ve todas
                 Dim sql = "SELECT C.CitaId, C.FechaHora, C.DuracionMinutos, C.Motivo, C.Estado,
@@ -20,7 +22,7 @@ Namespace Data
                            INNER JOIN Doctores D ON D.DoctorId=C.DoctorId
                            ORDER BY C.FechaHora DESC"
                 Return db.ExecuteQuery(sql)
-            Else ' Paciente: solo las propias
+            Else ' Doctor ve solo sus citas
                 Dim sql = "SELECT C.CitaId, C.FechaHora, C.DuracionMinutos, C.Motivo, C.Estado,
                                   D.DoctorId, D.Nombre AS Doctor, D.Especialidad
                            FROM Citas C
@@ -34,6 +36,7 @@ Namespace Data
             End If
         End Function
 
+        ' Verificar si el doctor está disponible en la fecha y hora dada
         Public Function EstaDisponible(doctorId As Integer, fechaHora As DateTime) As Boolean
             Dim sql = "SELECT COUNT(1) FROM Citas WHERE DoctorId=@DoctorId AND FechaHora=@FechaHora"
             Dim p = New List(Of SqlParameter) From {
@@ -43,7 +46,7 @@ Namespace Data
             Dim n = db.ExecuteScalar(Of Integer)(sql, p)
             Return n = 0
         End Function
-
+        ' Insertar nueva cita
         Public Function Insert(pacienteId As Integer, doctorId As Integer, fechaHora As DateTime,
                                duracionMin As Integer, motivo As String, estado As String) As Boolean
             If Not EstaDisponible(doctorId, fechaHora) Then
@@ -62,6 +65,7 @@ Namespace Data
             Return db.ExecuteNonQuery(sql, p)
         End Function
 
+        ' Actualizar cita existente
         Public Function Update(citaId As Integer, pacienteId As Integer, doctorId As Integer,
                                fechaHora As DateTime, duracionMin As Integer,
                                motivo As String, estado As String) As Boolean
@@ -81,13 +85,15 @@ Namespace Data
             Return db.ExecuteNonQuery(sql, p)
         End Function
 
+        ' Eliminar cita por ID
         Public Function Delete(citaId As Integer) As Boolean
             Dim sql = "DELETE FROM Citas WHERE CitaId=@CitaId"
             Dim p = New List(Of SqlParameter) From {db.CreateParameter("@CitaId", citaId)}
             Return db.ExecuteNonQuery(sql, p)
         End Function
 
-        ' Utilidad: obtener DoctorId actual de una cita (para páginas que editan parcialmente)
+
+        ' Obtener DoctorId asociado a una cita
         Public Function GetDoctorIdByCita(citaId As Integer) As Integer
             Dim sql = "SELECT DoctorId FROM Citas WHERE CitaId=@Id"
             Dim p = New List(Of SqlParameter) From {db.CreateParameter("@Id", citaId)}

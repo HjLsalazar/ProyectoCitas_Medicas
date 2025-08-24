@@ -18,12 +18,21 @@
             <div class="form-floating">
                 <asp:TextBox ID="txtPass" runat="server" CssClass="form-control" TextMode="Password" placeholder="Password"></asp:TextBox>
                 <label for="MainContent_txtPass">Password</label>
-                <asp:RequiredFieldValidator id="RequiredFieldValidatorPass"
+                <asp:RequiredFieldValidator ID="RequiredFieldValidatorPass"
                     ControlToValidate="txtPass"
                     Display="Dynamic"
                     ErrorMessage="La contraseña es requerida"
-                    runat="server"/>
+                    runat="server" />
             </div>
+
+            <asp:Panel ID="pnlRol" runat="server" Visible="false" CssClass="form-floating">
+                <asp:DropDownList ID="ddlRol" runat="server" CssClass="form-select">
+                    <asp:ListItem Text="Paciente" Value="1" Selected="True"></asp:ListItem>
+                    <asp:ListItem Text="Administrador" Value="2"></asp:ListItem>
+                </asp:DropDownList>
+                <label for="MainContent_ddlRol">Rol</label>
+
+            </asp:Panel>
 
             <asp:Button CssClass="btn btn-primary w-100 py-2" ID="btnRegistrar" runat="server" Text="Registrarse" OnClick="btnRegistrar_Click" />
         </div>

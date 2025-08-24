@@ -148,6 +148,7 @@
     <Content Include="Global.asax" />
     <Content Include="Home.aspx" />
     <Content Include="Login.aspx" />
+    <Content Include="Logout.aspx" />
     <Content Include="Pacientes.aspx" />
     <Content Include="Registro.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
@@ -234,6 +235,13 @@
       <SubType>ASPXCodebehind</SubType>
     </Compile>
     <Compile Include="Helpers\Simple3Des.vb" />
+    <Compile Include="Logout.aspx.designer.vb">
+      <DependentUpon>Logout.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Logout.aspx.vb">
+      <DependentUpon>Logout.aspx</DependentUpon>
+      <SubType>ASPXCodebehind</SubType>
+    </Compile>
     <Compile Include="Models\Citas.vb" />
     <Compile Include="Models\Doctor.vb" />
     <Compile Include="Models\Paciente.vb" />

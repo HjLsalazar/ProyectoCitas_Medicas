@@ -1,26 +1,29 @@
 ﻿Imports System.Data
 Imports System.Web.UI.WebControls
-Imports LoginRoles.Data   ' <-- Namespace donde está tu CitaRepository, PacienteRepository, DoctorRepository
-
-Partial Class Citas    ' Debe coincidir con Inherits="LoginRoles.Citas" del .aspx
+Imports LoginRoles.Data
+Partial Class Citas
     Inherits System.Web.UI.Page
 
+    ' Repositorios para acceder a datos
     Private ReadOnly _repoCita As New CitaRepository()
     Private ReadOnly _repoPaciente As New PacienteRepository()
     Private ReadOnly _repoDoctor As New DoctorRepository()
 
+    ' Propiedades para obtener datos de sesión
     Private ReadOnly Property RoleId As Integer
         Get
             Return CInt(Session("RoleId"))
         End Get
     End Property
 
+    ' UsuarioId del usuario en sesión
     Private ReadOnly Property UsuarioId As Integer
         Get
             Return CInt(Session("UsuarioId"))
         End Get
     End Property
 
+    ' Cargar datos al iniciar la página
     Protected Sub Page_Load(sender As Object, e As EventArgs) Handles Me.Load
         If Session("UsuarioId") Is Nothing Then
             Response.Redirect("Login.aspx")
@@ -32,6 +35,7 @@ Partial Class Citas    ' Debe coincidir con Inherits="LoginRoles.Citas" del .asp
         End If
     End Sub
 
+    ' Cargar lista de doctores en el DropDownList
     Private Sub CargarDoctores()
         Dim dt = _repoDoctor.GetAll()
         ddlDoctores.Items.Clear()
@@ -41,14 +45,16 @@ Partial Class Citas    ' Debe coincidir con Inherits="LoginRoles.Citas" del .asp
         Next
     End Sub
 
+    ' Enlazar datos al GridView
     Private Sub BindGrid()
         gvCitas.DataSource = _repoCita.GetList(RoleId, UsuarioId)
         gvCitas.DataBind()
     End Sub
 
+    ' Manejar clic en botón Agregar
     Protected Sub btnAgregar_Click(sender As Object, e As EventArgs) Handles btnAgregar.Click
         Try
-            ' Buscar PacienteId del usuario en sesión
+            ' Validar campos
             Dim dtPac = _repoPaciente.GetByUsuarioId(UsuarioId)
             If dtPac.Rows.Count = 0 Then Throw New Exception("Primero complete su ficha de Paciente.")
 
@@ -57,7 +63,7 @@ Partial Class Citas    ' Debe coincidir con Inherits="LoginRoles.Citas" del .asp
             Dim fecha = DateTime.ParseExact(txtFechaHora.Text.Trim(), "yyyy-MM-dd HH:mm", Nothing)
             Dim dur = Integer.Parse(txtDuracion.Text.Trim())
             Dim motivo = txtMotivo.Text.Trim()
-
+            ' Validaciones básicas
             Dim ok = _repoCita.Insert(pacienteId, doctorId, fecha, dur, motivo, "Pendiente")
             If ok Then
                 lblInfo.Text = "Cita reservada."
@@ -69,17 +75,19 @@ Partial Class Citas    ' Debe coincidir con Inherits="LoginRoles.Citas" del .asp
         End Try
     End Sub
 
-    ' Usa Handles para enlazar eventos sin tocar el .aspx
+    ' Manejar edición de filas en el GridView
     Protected Sub gvCitas_RowEditing(sender As Object, e As GridViewEditEventArgs) Handles gvCitas.RowEditing
         gvCitas.EditIndex = e.NewEditIndex
         BindGrid()
     End Sub
 
+    ' Manejar cancelación de edición
     Protected Sub gvCitas_RowCancelingEdit(sender As Object, e As GridViewCancelEditEventArgs) Handles gvCitas.RowCancelingEdit
         gvCitas.EditIndex = -1
         BindGrid()
     End Sub
 
+    ' Manejar actualización de filas
     Protected Sub gvCitas_RowUpdating(sender As Object, e As GridViewUpdateEventArgs) Handles gvCitas.RowUpdating
         Try
             Dim id = CInt(gvCitas.DataKeys(e.RowIndex).Value)
@@ -94,6 +102,7 @@ Partial Class Citas    ' Debe coincidir con Inherits="LoginRoles.Citas" del .asp
             Dim dtPac = _repoPaciente.GetByUsuarioId(UsuarioId)
             Dim pacienteId = If(dtPac.Rows.Count > 0, CInt(dtPac.Rows(0)("PacienteId")), 0)
 
+            ' Validaciones básicas
             Dim ok = _repoCita.Update(
                 id,
                 pacienteId,
@@ -112,6 +121,7 @@ Partial Class Citas    ' Debe coincidir con Inherits="LoginRoles.Citas" del .asp
         End Try
     End Sub
 
+    ' Manejar eliminación de filas
     Protected Sub gvCitas_RowDeleting(sender As Object, e As GridViewDeleteEventArgs) Handles gvCitas.RowDeleting
         Try
             Dim id = CInt(gvCitas.DataKeys(e.RowIndex).Value)
