@@ -84,13 +84,4 @@ Partial Public Class Registro
     '''Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
     '''</remarks>
     Protected WithEvents lblError As Global.System.Web.UI.WebControls.Label
-
-    '''<summary>
-    '''Control Prueba.
-    '''</summary>
-    '''<remarks>
-    '''Campo generado automáticamente.
-    '''Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-    '''</remarks>
-    Protected WithEvents Prueba As Global.System.Web.UI.WebControls.Button
 End Class
