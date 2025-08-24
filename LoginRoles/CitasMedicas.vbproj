@@ -235,6 +235,7 @@
     <Compile Include="Data\CitasRepository.vb" />
     <Compile Include="Data\DoctorRepository.vb" />
     <Compile Include="Data\PacienteRepository.vb" />
+    <Compile Include="Data\UsuarioRepósitory.vb" />
     <Compile Include="Doctores.aspx.designer.vb">
       <DependentUpon>Doctores.aspx</DependentUpon>
     </Compile>
