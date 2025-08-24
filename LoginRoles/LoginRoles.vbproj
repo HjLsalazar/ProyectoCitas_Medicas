@@ -125,6 +125,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Admin.aspx" />
+    <Content Include="Citas.aspx" />
     <Content Include="Content\bootstrap-grid.css" />
     <Content Include="Content\bootstrap-grid.min.css" />
     <Content Include="Content\bootstrap-grid.rtl.css" />
@@ -142,10 +143,12 @@
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="Content\Site.css" />
+    <Content Include="Doctores.aspx" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Home.aspx" />
     <Content Include="Login.aspx" />
+    <Content Include="Pacientes.aspx" />
     <Content Include="Registro.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
@@ -213,7 +216,26 @@
       <DependentUpon>Admin.aspx</DependentUpon>
       <SubType>ASPXCodebehind</SubType>
     </Compile>
+    <Compile Include="Citas.aspx.designer.vb">
+      <DependentUpon>Citas.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Citas.aspx.vb">
+      <DependentUpon>Citas.aspx</DependentUpon>
+      <SubType>ASPXCodebehind</SubType>
+    </Compile>
+    <Compile Include="Data\CitasRepository.vb" />
+    <Compile Include="Data\DoctorRepository.vb" />
+    <Compile Include="Data\PacienteRepository.vb" />
+    <Compile Include="Doctores.aspx.designer.vb">
+      <DependentUpon>Doctores.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Doctores.aspx.vb">
+      <DependentUpon>Doctores.aspx</DependentUpon>
+      <SubType>ASPXCodebehind</SubType>
+    </Compile>
     <Compile Include="Helpers\Simple3Des.vb" />
+    <Compile Include="Models\Citas.vb" />
+    <Compile Include="Models\Doctor.vb" />
     <Compile Include="Models\Paciente.vb" />
     <Compile Include="Models\Usuario.vb" />
     <Compile Include="Helpers\DatabaseHelper.vb" />
@@ -254,6 +276,13 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="Pacientes.aspx.designer.vb">
+      <DependentUpon>Pacientes.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pacientes.aspx.vb">
+      <DependentUpon>Pacientes.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Registro.aspx.designer.vb">
       <DependentUpon>Registro.aspx</DependentUpon>

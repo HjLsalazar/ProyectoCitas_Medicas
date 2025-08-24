@@ -1,4 +1,4 @@
-﻿' Breve: CRUD de Cita + validación de disponibilidad, separado del modelo POCO.
+﻿
 Imports System.Data
 Imports System.Data.SqlClient
 Imports LoginRoles.Helpers
