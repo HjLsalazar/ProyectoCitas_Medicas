@@ -13,11 +13,18 @@ Public Class Pacientes
             Response.Redirect("Login.aspx")
         End If
 
-        ' Solo el rol de administrador (2) puede ver el panel para agregar nuevos pacientes
-        pnlNuevo.Visible = (CInt(Session("RoleId")) = 2)
+        ' Controla la visibilidad del panel de nuevo paciente según el rol
+        Dim r As Integer = CInt(Session("RoleId"))
+
+        pnlNuevo.Visible = (r = 1 OrElse r = 2 OrElse r = 3)
 
         If Not IsPostBack Then
             BindGrid()
+
+            ' Muestra la columna de acciones solo para roles 1 (Admin) y 3 (Doctor)
+            If gvPacientes.Columns.Count > 0 Then
+                gvPacientes.Columns(gvPacientes.Columns.Count - 1).Visible = True
+            End If
         End If
     End Sub
 

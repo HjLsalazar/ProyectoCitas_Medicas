@@ -15,12 +15,18 @@ Partial Class Doctores
             Response.Redirect("Login.aspx")
         End If
 
-        ' Control de acceso: Solo Admin (RoleId=2) puede agregar/editar/borrar
-        pnlNuevo.Visible = (CInt(Session("RoleId")) = 2)
+        Dim r As Integer = CInt(Session("RoleId"))
 
-        ' Carga inicial del GridView
+        ' Admin puede agregar; Paciente/Doctor NO
+        pnlNuevo.Visible = (r = 2)
+
         If Not IsPostBack Then
             BindGrid()
+
+            ' Columna Borrar solo para Admin
+            If gvDoctores.Columns.Count > 0 Then
+                gvDoctores.Columns(gvDoctores.Columns.Count - 1).Visible = (r = 2)
+            End If
         End If
     End Sub
 

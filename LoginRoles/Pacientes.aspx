@@ -7,7 +7,7 @@
     <asp:Label ID="lblError" runat="server" CssClass="text-danger" Visible="False"></asp:Label>
     <asp:HyperLink ID="lnkLogout" runat="server" NavigateUrl="~/Logout.aspx" CssClass="btn-logout">Cerrar Sesión</asp:HyperLink>
 
-    <asp:Panel ID="pnlNuevo" runat="server" Visible="false" CssClass="mb-3">
+    <asp:Panel ID="pnlNuevo" runat="server"  CssClass="mb-3">
         <div class="row g-2">
             <div class="col-md-3">
                 <asp:TextBox ID="txtCedula" runat="server" CssClass="form-control" placeholder="Cedula"></asp:TextBox>

@@ -29,9 +29,19 @@ Partial Class Citas
             Response.Redirect("Login.aspx")
         End If
 
+        ' Mostrar u ocultar panel de nueva cita según rol
+        Dim r As Integer = CInt(Session("RoleId"))
+
+        ' Solo Paciente (3) no ve el panel
+        pnlNueva.Visible = (r = 1 OrElse r = 2)
+
         If Not IsPostBack Then
             CargarDoctores()
             BindGrid()
+
+            If gvCitas.Columns.Count > 0 Then
+                gvCitas.Columns(gvCitas.Columns.Count - 1).Visible = (r = 1 OrElse r = 2)
+            End If
         End If
     End Sub
 

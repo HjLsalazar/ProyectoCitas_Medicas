@@ -142,14 +142,15 @@
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/Pacientes.aspx">Pacientes</a></li>
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/Doctores.aspx">Doctores</a></li>
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/Citas.aspx">Citas</a></li>
-
-                        <li class="nav-item">
-                            <a class="nav-link" runat="server">
-                                <asp:Button ID="logout" runat="server" Text="Cerrar Sesión" OnClick="logout_Click" CssClass="btn btn-danger btn-sm" />
-                            </a>
-                        </li>
                         <% End If %>
                     </ul>
+
+                    <% If (autenticado = True) Then %>
+                    <div class="ms-auto">
+                        <asp:Button ID="logout" runat="server" Text="Cerrar Sesión"
+                            OnClick="logout_Click" CssClass="btn btn-danger btn-sm" />
+                    </div>
+                    <% End If %>
                 </div>
             </div>
         </nav>
