@@ -85,6 +85,9 @@ Public Class Login
         End If
     End Sub
 
+    Protected Sub ckbRecordar_CheckedChanged(sender As Object, e As EventArgs)
+    End Sub
+
 
 
 End Class
