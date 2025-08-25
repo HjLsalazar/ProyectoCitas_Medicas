@@ -94,3 +94,4 @@ SELECT U.ID, 'P-0002', '555-1002', 'Calle 2 #200' FROM dbo.Usuarios U WHERE U.Em
  select * from Doctores
  select * from Roles
  select * from Citas
+ 

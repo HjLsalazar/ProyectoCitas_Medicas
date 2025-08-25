@@ -31,20 +31,26 @@ END
 GO
 
 /* 3) Asegurar NOT NULL de 'Nombre' y rellenar si quedó NULL */
-IF EXISTS (SELECT 1 FROM sys.columns
-           WHERE object_id = OBJECT_ID('dbo.Roles')
-             AND name = 'Nombre' AND is_nullable=1)
+IF EXISTS (
+    SELECT 1
+    FROM sys.columns
+    WHERE object_id = OBJECT_ID('dbo.Roles')
+      AND name = 'Nombre'
+      AND is_nullable = 1
+)
 BEGIN
-    -- Rellenar desde RoleName si existe (por si se agregó como columna nueva)
+    -- Si existe RoleName, copiar su contenido a Nombre (usar SQL dinámico para evitar error de parseo)
     IF COL_LENGTH('dbo.Roles','RoleName') IS NOT NULL
-        UPDATE dbo.Roles SET Nombre = ISNULL(Nombre, RoleName);
+        EXEC(N'UPDATE dbo.Roles SET Nombre = COALESCE(Nombre, RoleName);');
 
-    -- Rellenar con vacío si quedó NULL
+    -- Completar cualquier NULL que quede
     UPDATE dbo.Roles SET Nombre = N'' WHERE Nombre IS NULL;
 
+    -- Hacer NOT NULL
     ALTER TABLE dbo.Roles ALTER COLUMN Nombre NVARCHAR(50) NOT NULL;
 END
 GO
+
 
 /* 4) Normalizar valores existentes a los 3 nombres esperados */
 UPDATE dbo.Roles SET Nombre = N'Administrador'
