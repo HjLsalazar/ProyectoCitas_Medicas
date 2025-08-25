@@ -2,29 +2,36 @@
 Imports LoginRoles.Helpers
 Imports LoginRoles.Models
 Imports Microsoft.Ajax.Utilities
-Imports LoginRoles.Data   ' <-- para DoctorRepository
+Imports LoginRoles.Data
 
 Public Class Registro
     Inherits System.Web.UI.Page
 
-    ' Mostrar panel de selección de rol solo si el usuario en sesión es admin (RoleId = 2)
-    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+    ' === Page_Load actualizado ===
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As EventArgs) Handles Me.Load
+        ' Si ya hay sesión y es doctor, no puede estar aquí
+        If Session("UsuarioId") IsNot Nothing AndAlso CInt(Session("RoleId")) = 3 Then
+            Response.Redirect("Home.aspx", False)
+            Context.ApplicationInstance.CompleteRequest()
+            Return
+        End If
+
         If Not IsPostBack Then
+            ' El panel de roles solo lo ve el admin
             pnlRol.Visible = (Session("UsuarioId") IsNot Nothing AndAlso CInt(Session("RoleId")) = 2)
         End If
     End Sub
 
-    ' === INFERENCIA DE ROL POR EMAIL ===
+    ' (Opcional) No es usada ahora, pero puedes dejarla
     Private Function InferRoleFromEmail(email As String) As Integer
-        If String.IsNullOrWhiteSpace(email) Then Return 1 ' Paciente por defecto
+        If String.IsNullOrWhiteSpace(email) Then Return 1
         Dim e = email.Trim().ToLowerInvariant()
-
         If e.Contains("@admin") Then
-            Return 2  ' Administrador
+            Return 2
         ElseIf e.Contains("@clinica") Then
-            Return 3  ' Doctor
+            Return 3
         Else
-            Return 1  ' Paciente
+            Return 1
         End If
     End Function
 
@@ -32,7 +39,6 @@ Public Class Registro
     Protected Function RegistrarUsuario(usuario As Usuario) As Boolean
         Dim helper As New DatabaseHelper()
 
-        ' SQL con RoleId
         Dim sql As String = "INSERT INTO Usuarios (Email, Pass, Nombre, Apellidos, RoleId)
                              VALUES (@Email, @Pass, @Nombre, @Apellidos, @RoleId)"
 
@@ -47,73 +53,78 @@ Public Class Registro
         Return helper.ExecuteNonQuery(sql, parameters)
     End Function
 
-    ' Evento del botón Registrar
+    ' === Evento del botón Registrar ===
     Protected Sub btnRegistrar_Click(sender As Object, e As EventArgs) Handles btnRegistrar.Click
-        ' (Dejé tu prueba de JS comentada para no interrumpir el flujo)
-        'Dim js As String = "alert('test');"
-        'ScriptManager.RegisterStartupScript(Page, Page.GetType(), Guid.NewGuid().ToString(), js, True)
-
-        ' Obtener valores
-        Dim email As String = txtEmail.Text
-        Dim nombre As String = txtNombre.Text
+        Dim email As String = txtEmail.Text.Trim()
+        Dim nombre As String = txtNombre.Text.Trim()
         Dim pass As String = txtPass.Text
 
-        ' Validación mínima
-        If email.IsNullOrWhiteSpace Or nombre.IsNullOrWhiteSpace Then
+        If String.IsNullOrWhiteSpace(email) OrElse String.IsNullOrWhiteSpace(nombre) Then
             lblError.Text = "Todos los campos son requeridos"
             lblError.Visible = True
             Exit Sub
         End If
 
-        ' Encriptar contraseña
         Dim wrapper As New Simple3Des("claveclavecita")
         Dim password As String = wrapper.EncryptData(pass)
 
-        ' Rol: si admin ve el panel, respeta su selección; si no, inferir por email
-        Dim sugerido As Integer = InferRoleFromEmail(email)
-        Dim roleId As Integer = If(pnlRol.Visible, CInt(ddlRol.SelectedValue), sugerido)
+        ' --- DETERMINAR NOMBRE DEL ROL ---
+        Dim rolNombre As String
 
-        ' Crear objeto Usuario
+        If pnlRol.Visible Then
+            ' Si el admin está creando el usuario, usamos el selector
+            Select Case ddlRol.SelectedValue
+                Case "2" : rolNombre = "Administrador"
+                Case "3" : rolNombre = "Doctor"
+                Case Else : rolNombre = "Paciente"
+            End Select
+        Else
+            ' Registro público: por dominio del correo
+            Dim eLower As String = email.ToLowerInvariant()
+            If eLower.Contains("@admin") Then
+                rolNombre = "Administrador"
+            ElseIf eLower.Contains("@clinica") Then
+                rolNombre = "Doctor"
+            Else
+                rolNombre = "Paciente"
+            End If
+        End If
+
+        ' --- Resolver RoleId real en BD ---
+        Dim helper As New DatabaseHelper()
+        Dim realRoleIdObj As Object = helper.ExecuteScalar(Of Integer)(
+            "SELECT RoleId FROM Roles WHERE Nombre = @n",
+            New List(Of SqlParameter) From {helper.CreateParameter("@n", rolNombre)}
+        )
+
+        If realRoleIdObj Is Nothing OrElse realRoleIdObj Is DBNull.Value Then
+            lblError.Text = "El rol '" & rolNombre & "' no existe en la tabla Roles. Verifica el seed de Roles."
+            lblError.Visible = True
+            Exit Sub
+        End If
+
+        Dim realRoleId As Integer = CInt(realRoleIdObj)
+
+        '  Crear y registrar usuario 
         Dim Usuario As New Usuario() With {
             .Nombre = nombre,
             .Apellidos = "",
             .Email = email,
             .Pass = password,
-            .RoleId = roleId
+            .RoleId = realRoleId
         }
 
-        Try
-            ' Registrar usuario
-            If RegistrarUsuario(Usuario) Then
-                ' Si queda como Doctor (3), crear también una fila base en Doctores
-                If roleId = 3 Then
-                    Dim dRepo As New DoctorRepository()
-                    dRepo.Insert(
-                        nombre.Trim(),   ' Nombre del doctor
-                        "",              ' Especialidad (luego se edita)
-                        email.Trim(),    ' Correo
-                        ""               ' Teléfono (luego se edita)
-                    )
-                End If
-
-                ' Redirección inmediata al Login
-                Response.Redirect("Login.aspx", False)
-                Context.ApplicationInstance.CompleteRequest()
-                Return
-            Else
-                ScriptManager.RegisterStartupScript(
-                    Me, Me.GetType(),
-                    "ServerControlScript",
-                    "Swal.fire('Error al registrar el usuario. Inténtalo de nuevo.');",
-                    True)
-                lblError.Text = "Error al registrar el usuario. Inténtalo de nuevo."
-                lblError.Visible = True
-            End If
-
-        Catch ex As Exception
-            lblError.Text = ex.Message
+        If RegistrarUsuario(Usuario) Then
+            Response.Redirect("Login.aspx", False)
+            Context.ApplicationInstance.CompleteRequest()
+            Return
+        Else
+            ScriptManager.RegisterStartupScript(Me, Me.GetType(),
+                "ServerControlScript",
+                "Swal.fire('Error al registrar el usuario. Inténtalo de nuevo.');", True)
+            lblError.Text = "Error al registrar el usuario. Inténtalo de nuevo."
             lblError.Visible = True
-        End Try
+        End If
     End Sub
 
 End Class

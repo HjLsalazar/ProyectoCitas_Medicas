@@ -3,14 +3,17 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
     <h2>Pacientes</h2>
+
     <asp:Label ID="lblInfo" runat="server" CssClass="text-success" Visible="False"></asp:Label>
     <asp:Label ID="lblError" runat="server" CssClass="text-danger" Visible="False"></asp:Label>
-    
-    <asp:Panel ID="pnlNuevo" runat="server"  CssClass="mb-3">
+
+  
+    <asp:Panel ID="pnlNuevo" runat="server" CssClass="mb-3">
         <div class="row g-2">
             <div class="col-md-3">
-                <asp:TextBox ID="txtCedula" runat="server" CssClass="form-control" placeholder="Cedula"></asp:TextBox>
-                <asp:RequiredFieldValidator runat="server" ControlToValidate="txtCedula" CssClass="text-danger" ErrorMessage="Cedula requerida" />
+                <asp:TextBox ID="txtCedula" runat="server" CssClass="form-control" placeholder="Cédula"></asp:TextBox>
+                <asp:RequiredFieldValidator ID="rfvCedula" runat="server" ControlToValidate="txtCedula"
+                    CssClass="text-danger" ErrorMessage="Cédula requerida" Display="Dynamic" />
             </div>
 
             <div class="col-md-3">
@@ -22,7 +25,8 @@
             </div>
 
             <div class="col-md-2">
-                <asp:Button ID="btnAgregar" runat="server" CssClass="btn btn-primary w-100" Text="Agregar" OnClick="btnAgregar_Click" />
+                <asp:Button ID="btnAgregar" runat="server" CssClass="btn btn-primary w-100" Text="Agregar"
+                    OnClick="btnAgregar_Click" />
             </div>
         </div>
     </asp:Panel>
@@ -38,10 +42,9 @@
             <asp:BoundField DataField="Cedula" HeaderText="Cédula" />
             <asp:BoundField DataField="Telefono" HeaderText="Teléfono" />
             <asp:BoundField DataField="Direccion" HeaderText="Dirección" />
+          
             <asp:CommandField ShowEditButton="True" ShowDeleteButton="True" />
         </Columns>
-        <EmptyDataTemplate>
-            No hay pacientes registrados.
-        </EmptyDataTemplate>
+        <EmptyDataTemplate>No hay pacientes registrados.</EmptyDataTemplate>
     </asp:GridView>
 </asp:Content>

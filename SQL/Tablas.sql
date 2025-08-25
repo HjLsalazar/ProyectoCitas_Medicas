@@ -88,6 +88,7 @@ SELECT U.ID, 'P-0001', '555-1001', 'Calle 1 #100' FROM dbo.Usuarios U WHERE U.Em
 
 INSERT INTO dbo.Pacientes (UsuarioId, Cedula, Telefono, Direccion)
 SELECT U.ID, 'P-0002', '555-1002', 'Calle 2 #200' FROM dbo.Usuarios U WHERE U.Email='ana@molina.com';
+
  select * from Usuarios
  select * from Pacientes
  select * from Doctores

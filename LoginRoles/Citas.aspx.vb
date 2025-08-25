@@ -39,9 +39,6 @@ Partial Class Citas
             CargarDoctores()
             BindGrid()
 
-            If gvCitas.Columns.Count > 0 Then
-                gvCitas.Columns(gvCitas.Columns.Count - 1).Visible = (r = 1 OrElse r = 2)
-            End If
         End If
     End Sub
 
@@ -55,11 +52,30 @@ Partial Class Citas
         Next
     End Sub
 
+
     ' Enlazar datos al GridView
     Private Sub BindGrid()
-        gvCitas.DataSource = _repoCita.GetList(RoleId, UsuarioId)
+        Dim r As Integer = RoleId
+        Dim uid As Integer = UsuarioId
+        Dim dt As DataTable
+
+        If r = 3 Then
+            ' Doctor: ver todas las citas (como admin)
+            dt = _repoCita.GetList(2, 0)
+        Else
+            ' Paciente/Admin: lógica actual
+            dt = _repoCita.GetList(r, uid)
+        End If
+
+        gvCitas.DataSource = dt
         gvCitas.DataBind()
+
+        ' Solo Admin(2) y Paciente(1) pueden ver Editar/Eliminar
+        If gvCitas.Columns.Count > 0 Then
+            gvCitas.Columns(gvCitas.Columns.Count - 1).Visible = (r = 1 OrElse r = 2)
+        End If
     End Sub
+
 
     ' Manejar clic en botón Agregar
     Protected Sub btnAgregar_Click(sender As Object, e As EventArgs) Handles btnAgregar.Click

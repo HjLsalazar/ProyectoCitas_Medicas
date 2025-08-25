@@ -4,47 +4,54 @@ Imports LoginRoles.Data
 Public Class Pacientes
     Inherits System.Web.UI.Page
 
-    ' Repositorio de pacientes
     Private ReadOnly _repo As New PacienteRepository()
 
-    ' Evento de carga de la página
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
         If Session("UsuarioId") Is Nothing Then
             Response.Redirect("Login.aspx")
+            Return
         End If
 
-        ' Controla la visibilidad del panel de nuevo paciente según el rol
         Dim r As Integer = CInt(Session("RoleId"))
 
-        pnlNuevo.Visible = (r = 1 OrElse r = 2 OrElse r = 3)
+        ' SOLO el Admin ve los TextBox/botón para agregar
+        pnlNuevo.Visible = (r = 2)
 
         If Not IsPostBack Then
             BindGrid()
 
-            ' Muestra la columna de acciones solo para roles 1 (Admin) y 3 (Doctor)
+            ' La columna de acciones (Editar/Eliminar) sólo para Admin
+            ' *IMPORTANTE*: esta columna debe ser la última en el GridView
             If gvPacientes.Columns.Count > 0 Then
-                gvPacientes.Columns(gvPacientes.Columns.Count - 1).Visible = True
+                gvPacientes.Columns(gvPacientes.Columns.Count - 1).Visible = (r = 2)
             End If
         End If
     End Sub
 
-    ' Enlaza los datos al GridView
     Private Sub BindGrid()
         Dim roleId = CInt(Session("RoleId"))
         Dim usuarioId = CInt(Session("UsuarioId"))
 
-        If roleId = 2 Then
+        If roleId = 2 OrElse roleId = 3 Then
+            ' Admin y Doctor ven TODOS los pacientes
             gvPacientes.DataSource = _repo.GetAll()
         Else
+            ' Paciente: solo su propia ficha
             gvPacientes.DataSource = _repo.GetByUsuarioId(usuarioId)
         End If
+
         gvPacientes.DataBind()
     End Sub
 
-    ' Evento para agregar un nuevo paciente
+    ' --------- Crear paciente (sólo Admin) ----------
     Protected Sub btnAgregar_Click(sender As Object, e As EventArgs) Handles btnAgregar.Click
+        If CInt(Session("RoleId")) <> 2 Then
+            lblError.Text = "No autorizado."
+            lblError.Visible = True
+            Return
+        End If
+
         Try
-            ' Validaciones básicas
             Dim ok = _repo.Insert(
                 CInt(Session("UsuarioId")),
                 txtCedula.Text.Trim(),
@@ -64,8 +71,14 @@ Public Class Pacientes
         End Try
     End Sub
 
-    ' Eventos del GridView para editar, actualizar y eliminar
+    ' --------- Protección extra en edición/eliminación ----------
     Protected Sub gvPacientes_RowEditing(sender As Object, e As GridViewEditEventArgs) Handles gvPacientes.RowEditing
+        If CInt(Session("RoleId")) <> 2 Then
+            ' Bloquear edición para Doctor y Paciente
+            lblError.Text = "Sólo el administrador puede editar."
+            lblError.Visible = True
+            Return
+        End If
         gvPacientes.EditIndex = e.NewEditIndex
         BindGrid()
     End Sub
@@ -75,10 +88,14 @@ Public Class Pacientes
         BindGrid()
     End Sub
 
-    ' Evento para actualizar un paciente
     Protected Sub gvPacientes_RowUpdating(sender As Object, e As GridViewUpdateEventArgs) Handles gvPacientes.RowUpdating
-        Try
+        If CInt(Session("RoleId")) <> 2 Then
+            lblError.Text = "No autorizado."
+            lblError.Visible = True
+            Return
+        End If
 
+        Try
             Dim id = CInt(gvPacientes.DataKeys(e.RowIndex).Value)
             Dim row = gvPacientes.Rows(e.RowIndex)
 
@@ -97,8 +114,14 @@ Public Class Pacientes
         End Try
     End Sub
 
-    ' Evento para eliminar un paciente
     Protected Sub gvPacientes_RowDeleting(sender As Object, e As GridViewDeleteEventArgs) Handles gvPacientes.RowDeleting
+        If CInt(Session("RoleId")) <> 2 Then
+            e.Cancel = True
+            lblError.Text = "No autorizado."
+            lblError.Visible = True
+            Return
+        End If
+
         Try
             Dim id = CInt(gvPacientes.DataKeys(e.RowIndex).Value)
             If _repo.Delete(id) Then

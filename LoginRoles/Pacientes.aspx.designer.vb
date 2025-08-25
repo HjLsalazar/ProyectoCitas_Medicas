@@ -50,6 +50,15 @@ Partial Public Class Pacientes
     Protected WithEvents txtCedula As Global.System.Web.UI.WebControls.TextBox
 
     '''<summary>
+    '''Control rfvCedula.
+    '''</summary>
+    '''<remarks>
+    '''Campo generado automáticamente.
+    '''Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+    '''</remarks>
+    Protected WithEvents rfvCedula As Global.System.Web.UI.WebControls.RequiredFieldValidator
+
+    '''<summary>
     '''Control txtTelefono.
     '''</summary>
     '''<remarks>
