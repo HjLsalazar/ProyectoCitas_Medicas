@@ -7,9 +7,9 @@ Imports LoginRoles.Data
 Public Class Registro
     Inherits System.Web.UI.Page
 
-    ' === Page_Load actualizado ===
+    ' Carga inicial de la página
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As EventArgs) Handles Me.Load
-        ' Si ya hay sesión y es doctor, no puede estar aquí
+        ' Redirigir si ya está logueado
         If Session("UsuarioId") IsNot Nothing AndAlso CInt(Session("RoleId")) = 3 Then
             Response.Redirect("Home.aspx", False)
             Context.ApplicationInstance.CompleteRequest()
@@ -17,12 +17,12 @@ Public Class Registro
         End If
 
         If Not IsPostBack Then
-            ' El panel de roles solo lo ve el admin
+            ' Mostrar u ocultar panel de selección de rol
             pnlRol.Visible = (Session("UsuarioId") IsNot Nothing AndAlso CInt(Session("RoleId")) = 2)
         End If
     End Sub
 
-    ' (Opcional) No es usada ahora, pero puedes dejarla
+    ' Inferir RoleId a partir del email (registro público)
     Private Function InferRoleFromEmail(email As String) As Integer
         If String.IsNullOrWhiteSpace(email) Then Return 1
         Dim e = email.Trim().ToLowerInvariant()
@@ -53,7 +53,7 @@ Public Class Registro
         Return helper.ExecuteNonQuery(sql, parameters)
     End Function
 
-    ' === Evento del botón Registrar ===
+    ' Evento del botón Registrar
     Protected Sub btnRegistrar_Click(sender As Object, e As EventArgs) Handles btnRegistrar.Click
         Dim email As String = txtEmail.Text.Trim()
         Dim nombre As String = txtNombre.Text.Trim()
@@ -68,18 +68,18 @@ Public Class Registro
         Dim wrapper As New Simple3Des("claveclavecita")
         Dim password As String = wrapper.EncryptData(pass)
 
-        ' --- DETERMINAR NOMBRE DEL ROL ---
+        ' Determinar rol
         Dim rolNombre As String
 
         If pnlRol.Visible Then
-            ' Si el admin está creando el usuario, usamos el selector
+            ' Registro interno: por selección del admin
             Select Case ddlRol.SelectedValue
                 Case "2" : rolNombre = "Administrador"
                 Case "3" : rolNombre = "Doctor"
                 Case Else : rolNombre = "Paciente"
             End Select
         Else
-            ' Registro público: por dominio del correo
+            ' Registro público: inferir por email
             Dim eLower As String = email.ToLowerInvariant()
             If eLower.Contains("@admin") Then
                 rolNombre = "Administrador"
@@ -90,19 +90,21 @@ Public Class Registro
             End If
         End If
 
-        ' --- Resolver RoleId real en BD ---
+        ' Obtener RoleId real desde la tabla Roles
         Dim helper As New DatabaseHelper()
         Dim realRoleIdObj As Object = helper.ExecuteScalar(Of Integer)(
             "SELECT RoleId FROM Roles WHERE Nombre = @n",
             New List(Of SqlParameter) From {helper.CreateParameter("@n", rolNombre)}
         )
 
+        ' Validar que el rol exista
         If realRoleIdObj Is Nothing OrElse realRoleIdObj Is DBNull.Value Then
             lblError.Text = "El rol '" & rolNombre & "' no existe en la tabla Roles. Verifica el seed de Roles."
             lblError.Visible = True
             Exit Sub
         End If
 
+        ' Convertir a Integer
         Dim realRoleId As Integer = CInt(realRoleIdObj)
 
         '  Crear y registrar usuario 
@@ -119,6 +121,7 @@ Public Class Registro
             Context.ApplicationInstance.CompleteRequest()
             Return
         Else
+            ' Error al insertar
             ScriptManager.RegisterStartupScript(Me, Me.GetType(),
                 "ServerControlScript",
                 "Swal.fire('Error al registrar el usuario. Inténtalo de nuevo.');", True)

@@ -7,15 +7,16 @@ Public Class Login
 
     Protected Sub Page_Load(sender As Object, e As EventArgs) Handles Me.Load
         If Not IsPostBack Then
-            ' Llamar JS para rellenar si hay un email guardado
+            ' Cargar email recordado al cargar la página
             Dim script As String = $"cargarEmail('{txtEmail.ClientID}','{ckbRecordar.ClientID}');"
             ScriptManager.RegisterStartupScript(Me, Me.GetType(), "cargarEmail", script, True)
 
-            ' Ejecutar guardarEmail en el cliente cuando el usuario pulse Acceder
+            ' Asignar el evento OnClientClick al botón
             btnLogin.OnClientClick = $"guardarEmail('{txtEmail.ClientID}','{ckbRecordar.ClientID}');"
         End If
     End Sub
 
+    ' Verifica usuario y guarda sesión
     Protected Function VerificarUsuario(usuario As Usuario) As Boolean
         Try
             Dim helper As New DatabaseHelper()
@@ -35,14 +36,14 @@ Public Class Login
             Dim dataTable As DataTable = helper.ExecuteQuery(query, parametros)
 
             If dataTable.Rows.Count > 0 Then
-                ' Mapear a tu modelo y guardar sesión
+                ' Usuario encontrado, guardar en sesión
                 usuario = usuario.dtToUsuario(dataTable)
 
                 Session("UsuarioId") = usuario.Id
                 Session("UsuarioNombre") = usuario.Nombre
                 Session("UsuarioApellido") = usuario.Apellidos
                 Session("UsuarioEmail") = usuario.Email
-                Session("Email") = usuario.Email   ' ← añadido
+                Session("Email") = usuario.Email
                 Session("RoleId") = usuario.RoleId
                 Session("User") = usuario
 
@@ -56,6 +57,7 @@ Public Class Login
         End Try
     End Function
 
+    ' Evento del botón Login
     Protected Sub btnLogin_Click(sender As Object, e As EventArgs)
         Dim usuario As New Usuario() With {
             .Email = txtEmail.Text.Trim(),
@@ -63,9 +65,7 @@ Public Class Login
         }
 
         If VerificarUsuario(usuario) Then
-            ' Redirección unificada:
-            '   - Admin (2) -> Admin.aspx
-            '   - Paciente (1) y Doctor (3) -> Home.aspx
+            ' Redirigir según rol
             Dim roleId As Integer = 0
             If Session("RoleId") IsNot Nothing Then
                 roleId = CInt(Session("RoleId"))
@@ -74,10 +74,10 @@ Public Class Login
             If roleId = 2 Then
                 Response.Redirect("Admin.aspx", False)
             Else
-                Response.Redirect("Home.aspx", False)  ' Paciente y Doctor van al Inicio
+                Response.Redirect("Home.aspx", False)
             End If
 
-            ' Forma no bloqueante
+            ' Evitar ThreadAbortException
             Context.ApplicationInstance.CompleteRequest()
         Else
             lblError.Text = "Correo electrónico o contraseña inválidos."
@@ -85,6 +85,6 @@ Public Class Login
         End If
     End Sub
 
-    Protected Sub ckbRecordar_CheckedChanged(sender As Object, e As EventArgs)
-    End Sub
+
+
 End Class

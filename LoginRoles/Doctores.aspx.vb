@@ -7,7 +7,7 @@ Partial Class Doctores
     ' Repositorio de Doctores
     Private ReadOnly _repo As New DoctorRepository()
 
-    ' ===== Page_Load integrado =====
+    ' Carga inicial de la página
     Protected Sub Page_Load(sender As Object, e As EventArgs) Handles Me.Load
         If Session("UsuarioId") Is Nothing Then
             Response.Redirect("Login.aspx")
@@ -36,7 +36,8 @@ Partial Class Doctores
         gvDoctores.DataBind()
     End Sub
 
-    ' Agregar (visible para Admin y Doctor)
+
+    ' Crear nuevo doctor: Admin y Doctor 
     Protected Sub btnAgregar_Click(sender As Object, e As EventArgs) Handles btnAgregar.Click
         Try
             Dim ok = _repo.Insert(
@@ -58,19 +59,22 @@ Partial Class Doctores
         End Try
     End Sub
 
-    ' ===== Acciones de edición: solo Admin (guardas opcionales) =====
+
+    ' Editar doctor: sólo Admin
     Protected Sub gvDoctores_RowEditing(sender As Object, e As GridViewEditEventArgs) Handles gvDoctores.RowEditing
         If CInt(Session("RoleId")) <> 2 Then Exit Sub
         gvDoctores.EditIndex = e.NewEditIndex
         BindGrid()
     End Sub
 
+    ' Cancelar edición
     Protected Sub gvDoctores_RowCancelingEdit(sender As Object, e As GridViewCancelEditEventArgs) Handles gvDoctores.RowCancelingEdit
         If CInt(Session("RoleId")) <> 2 Then Exit Sub
         gvDoctores.EditIndex = -1
         BindGrid()
     End Sub
 
+    ' Actualizar doctor
     Protected Sub gvDoctores_RowUpdating(sender As Object, e As GridViewUpdateEventArgs) Handles gvDoctores.RowUpdating
         If CInt(Session("RoleId")) <> 2 Then Exit Sub
         Try
@@ -82,6 +86,7 @@ Partial Class Doctores
             Dim correo = CType(row.Cells(3).Controls(0), TextBox).Text.Trim()
             Dim tel = CType(row.Cells(4).Controls(0), TextBox).Text.Trim()
 
+            ' Validaciones básicas
             Dim ok = _repo.Update(id, nombre, esp, correo, tel)
             If ok Then
                 gvDoctores.EditIndex = -1
@@ -93,6 +98,7 @@ Partial Class Doctores
         End Try
     End Sub
 
+    ' Eliminar doctor
     Protected Sub gvDoctores_RowDeleting(sender As Object, e As GridViewDeleteEventArgs) Handles gvDoctores.RowDeleting
         If CInt(Session("RoleId")) <> 2 Then Exit Sub
         Try

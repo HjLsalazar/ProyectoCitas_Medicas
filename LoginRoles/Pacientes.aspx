@@ -1,15 +1,18 @@
 ﻿<%@ Page Title="" Language="vb" AutoEventWireup="false" MasterPageFile="~/Site.Master" CodeBehind="Pacientes.aspx.vb"
     Inherits="LoginRoles.Pacientes" %>
 
+<%--   --%>
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
     <h2>Pacientes</h2>
 
+     <%-- Mensajes de feedback: éxito y error (se controlan desde el code-behind) --%>
     <asp:Label ID="lblInfo" runat="server" CssClass="text-success" Visible="False"></asp:Label>
     <asp:Label ID="lblError" runat="server" CssClass="text-danger" Visible="False"></asp:Label>
 
-  
+   <%-- Panel del formulario para crear un nuevo paciente (se muestra/oculta según el rol en Page_Load) --%>
     <asp:Panel ID="pnlNuevo" runat="server" CssClass="mb-3">
         <div class="row g-2">
+              <%-- Campo Cédula + validador requerido --%>
             <div class="col-md-3">
                 <asp:TextBox ID="txtCedula" runat="server" CssClass="form-control" placeholder="Cédula"></asp:TextBox>
                 <asp:RequiredFieldValidator ID="rfvCedula" runat="server" ControlToValidate="txtCedula"
@@ -31,6 +34,8 @@
         </div>
     </asp:Panel>
 
+
+     <%-- Grid con el listado de pacientes DataKeyNames="PacienteId" para operaciones de edición/eliminación. --%>
     <asp:GridView ID="gvPacientes" runat="server" CssClass="table table-striped"
         AutoGenerateColumns="False" DataKeyNames="PacienteId">
         <Columns>

@@ -89,6 +89,7 @@ Partial Class Citas
             Dim fecha = DateTime.ParseExact(txtFechaHora.Text.Trim(), "yyyy-MM-dd HH:mm", Nothing)
             Dim dur = Integer.Parse(txtDuracion.Text.Trim())
             Dim motivo = txtMotivo.Text.Trim()
+
             ' Validaciones básicas
             Dim ok = _repoCita.Insert(pacienteId, doctorId, fecha, dur, motivo, "Pendiente")
             If ok Then
@@ -124,7 +125,7 @@ Partial Class Citas
             Dim motivoTxt = CType(row.Cells(3).Controls(0), TextBox).Text.Trim()
             Dim estadoTxt = CType(row.Cells(4).Controls(0), TextBox).Text.Trim()
 
-            Dim doctorActual = _repoCita.GetDoctorIdByCita(id)  ' mantener doctor asignado
+            Dim doctorActual = _repoCita.GetDoctorIdByCita(id)
             Dim dtPac = _repoPaciente.GetByUsuarioId(UsuarioId)
             Dim pacienteId = If(dtPac.Rows.Count > 0, CInt(dtPac.Rows(0)("PacienteId")), 0)
 
@@ -177,7 +178,7 @@ Partial Class Citas
         txtDuracion.Text = String.Empty
         txtMotivo.Text = String.Empty
 
-        ' opcional: dejar el foco en el primer control
+        ' dejar el foco en el primer control
         ddlDoctores.Focus()
     End Sub
 

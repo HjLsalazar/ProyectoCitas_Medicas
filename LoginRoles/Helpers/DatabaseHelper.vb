@@ -8,20 +8,20 @@ Namespace Helpers
         Private ReadOnly _connectionString As String =
             ConfigurationManager.ConnectionStrings("Login").ConnectionString
 
-        ' Crea y abre la conexión (usa try/catch en el llamado ).
+        ' Crea y abre la conexión 
         Public Function GetConnection() As SqlConnection
             Dim cn As New SqlConnection(_connectionString)
             cn.Open()
             Return cn
         End Function
 
-        ' Crea parámetro tipado de forma compacta.
+        ' Crea un parámetro SQL
         Public Function CreateParameter(name As String, value As Object) As SqlParameter
             Dim p As New SqlParameter(name, If(value Is Nothing, DBNull.Value, value))
             Return p
         End Function
 
-        ' SELECT → DataTable.
+        ' SELECT → DataTable
         Public Function ExecuteQuery(sql As String,
                                      Optional parameters As List(Of SqlParameter) = Nothing,
                                      Optional isStoredProcedure As Boolean = False) As DataTable
@@ -38,7 +38,7 @@ Namespace Helpers
             End Using
         End Function
 
-        ' INSERT/UPDATE/DELETE → Boolean por conveniencia.
+        ' INSERT, UPDATE, DELETE
         Public Function ExecuteNonQuery(sql As String,
                                         Optional parameters As List(Of SqlParameter) = Nothing,
                                         Optional isStoredProcedure As Boolean = False) As Boolean
@@ -51,7 +51,7 @@ Namespace Helpers
             End Using
         End Function
 
-        ' Escalar (ej. COUNT(*), SCOPE_IDENTITY()).
+        ' SELECT que devuelve un solo valor
         Public Function ExecuteScalar(Of T)(sql As String,
                                             Optional parameters As List(Of SqlParameter) = Nothing) As T
             Using cn = GetConnection()

@@ -52,7 +52,8 @@ Public Class Admin
 
 
     ' ---------------------- USUARIOS ----------------------
-    ' (Administradores y Doctores)
+
+    ' Mostrar usuarios
     Private Sub BindUsuarios()
         gvUsuarios.DataSource = uRepo.GetAll()
         gvUsuarios.DataBind()
@@ -111,7 +112,7 @@ Public Class Admin
 
     ' ---------------------- PACIENTES ----------------------
 
-    ' (Pacientes están ligados a Usuarios)
+    ' Mostrar pacientes
     Private Sub BindPacientes()
         gvPacientesAdmin.DataSource = pRepo.GetAll()
         gvPacientesAdmin.DataBind()
@@ -138,9 +139,13 @@ Public Class Admin
     Protected Sub gvPacientesAdmin_RowEditing(sender As Object, e As GridViewEditEventArgs)
         gvPacientesAdmin.EditIndex = e.NewEditIndex : BindPacientes()
     End Sub
+
+    ' Cancelar edición
     Protected Sub gvPacientesAdmin_RowCancelingEdit(sender As Object, e As GridViewCancelEditEventArgs)
         gvPacientesAdmin.EditIndex = -1 : BindPacientes()
     End Sub
+
+    ' Actualizar paciente
     Protected Sub gvPacientesAdmin_RowUpdating(sender As Object, e As GridViewUpdateEventArgs)
         Dim id = CInt(gvPacientesAdmin.DataKeys(e.RowIndex).Value)
         Dim row = gvPacientesAdmin.Rows(e.RowIndex)
@@ -148,6 +153,7 @@ Public Class Admin
         Dim tel = CType(row.Cells(6).Controls(0), TextBox).Text.Trim()
         Dim dir = CType(row.Cells(7).Controls(0), TextBox).Text.Trim()
 
+       
         If pRepo.Update(id, cedula, tel, dir) Then
             gvPacientesAdmin.EditIndex = -1 : BindPacientes()
         End If
@@ -161,7 +167,7 @@ Public Class Admin
 
     ' ---------------------- DOCTORES ----------------------
 
-    ' (Doctores no están ligados a Usuarios en este ejemplo)
+    ' Mostrar doctores
     Private Sub BindDoctores()
         gvDoctoresAdmin.DataSource = dRepo.GetAll()
         gvDoctoresAdmin.DataBind()
@@ -215,6 +221,8 @@ Public Class Admin
     End Sub
 
     ' ---------------------- CITAS ----------------------
+
+    ' Mostrar citas
     Private Sub BindCitas()
         ' Mostrar citas con detalles de paciente y doctor
         gvCitasAdmin.DataSource = cRepo.GetList(2, 0)
@@ -266,6 +274,7 @@ Public Class Admin
             Dim pacId = CInt(dtP.Rows(0)("PacienteId"))
             Dim docId = CInt(dtP.Rows(0)("DoctorId"))
 
+            ' Actualizar cita
             Dim ok = cRepo.Update(
                 id,
                 pacId,
