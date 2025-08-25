@@ -288,4 +288,28 @@ Public Class Admin
         If cRepo.Delete(id) Then BindCitas()
     End Sub
 
+    ' Limpia todos los controles del formulario de Citas (Admin)
+    Private Sub ResetCitasForm()
+        ' Paciente
+        ddlCPaciente.ClearSelection()
+        If ddlCPaciente.Items.FindByValue("") Is Nothing Then
+            ddlCPaciente.Items.Insert(0, New ListItem("-- Seleccione --", ""))
+        End If
+        ddlCPaciente.SelectedValue = ""
+
+        ' Doctor
+        ddlCDoctor.ClearSelection()
+        If ddlCDoctor.Items.FindByValue("") Is Nothing Then
+            ddlCDoctor.Items.Insert(0, New ListItem("-- Seleccione --", ""))
+        End If
+        ddlCDoctor.SelectedValue = ""
+
+        ' TextBox
+        txtCFechaHora.Text = String.Empty
+        txtCDuracion.Text = String.Empty
+        txtCMotivo.Text = String.Empty
+
+        ddlCPaciente.Focus()
+    End Sub
+
 End Class

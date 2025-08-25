@@ -142,4 +142,27 @@ Partial Class Citas
             lblError.Text = ex.Message : lblError.Visible = True
         End Try
     End Sub
+
+    ' Limpia los controles del formulario de nueva cita
+    Private Sub LimpiarFormulario()
+        ' reset del combo de doctores
+        ddlDoctores.ClearSelection()
+        If ddlDoctores.Items.Count > 0 Then
+            Dim it = ddlDoctores.Items.FindByValue("")
+            If it IsNot Nothing Then
+                ddlDoctores.SelectedValue = ""
+            Else
+                ddlDoctores.SelectedIndex = 0
+            End If
+        End If
+
+        ' limpiar textos
+        txtFechaHora.Text = String.Empty
+        txtDuracion.Text = String.Empty
+        txtMotivo.Text = String.Empty
+
+        ' opcional: dejar el foco en el primer control
+        ddlDoctores.Focus()
+    End Sub
+
 End Class

@@ -5,8 +5,7 @@
     <h2>Pacientes</h2>
     <asp:Label ID="lblInfo" runat="server" CssClass="text-success" Visible="False"></asp:Label>
     <asp:Label ID="lblError" runat="server" CssClass="text-danger" Visible="False"></asp:Label>
-    <asp:HyperLink ID="lnkLogout" runat="server" NavigateUrl="~/Logout.aspx" CssClass="btn-logout">Cerrar Sesión</asp:HyperLink>
-
+    
     <asp:Panel ID="pnlNuevo" runat="server"  CssClass="mb-3">
         <div class="row g-2">
             <div class="col-md-3">

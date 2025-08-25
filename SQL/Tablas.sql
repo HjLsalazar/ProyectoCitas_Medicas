@@ -60,3 +60,36 @@ BEGIN
     CREATE INDEX IX_Citas_Paciente ON [dbo].[Citas]([PacienteId]);
 END
 GO
+
+USE II46;
+GO
+
+-- Admin
+UPDATE dbo.Usuarios SET RoleId = 2 WHERE Email = 'Hernan@lindo.com';
+
+-- Pacientes
+UPDATE dbo.Usuarios SET RoleId = 1 WHERE Email = 'juan@perez.com';
+UPDATE dbo.Usuarios SET RoleId = 1 WHERE Email = 'ana@molina.com';
+GO
+
+-- Verificar
+SELECT ID, Nombre, Apellidos, Email, RoleId
+FROM dbo.Usuarios
+WHERE Email IN ('Hernan@lindo.com','juan@perez.com','ana@molina.com');
+
+-- Doctores de prueba
+INSERT INTO dbo.Doctores (Nombre, Especialidad, Correo, Telefono)
+VALUES ('Dra. Sofía Lozano','Cardiología','sofia@clinica.com','555-0101'),
+       ('Dr. Marco Díaz','Dermatología','marco@clinica.com','555-0102');
+
+-- Fichas de Paciente para los usuarios juan y ana
+INSERT INTO dbo.Pacientes (UsuarioId, Cedula, Telefono, Direccion)
+SELECT U.ID, 'P-0001', '555-1001', 'Calle 1 #100' FROM dbo.Usuarios U WHERE U.Email='juan@perez.com';
+
+INSERT INTO dbo.Pacientes (UsuarioId, Cedula, Telefono, Direccion)
+SELECT U.ID, 'P-0002', '555-1002', 'Calle 2 #200' FROM dbo.Usuarios U WHERE U.Email='ana@molina.com';
+ select * from Usuarios
+ select * from Pacientes
+ select * from Doctores
+ select * from Roles
+ select * from Citas
