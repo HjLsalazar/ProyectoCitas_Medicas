@@ -1,17 +1,23 @@
 ﻿Public Class Home
     Inherits System.Web.UI.Page
 
-
-    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
-        ' Validar si el usuario ha iniciado sesión
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As EventArgs) Handles Me.Load
+        ' Si no hay sesión, enviar a Login
         If Session("UsuarioId") Is Nothing Then
             Response.Redirect("Login.aspx")
+            Return
+        End If
 
-            ' Si no hay sesión, redirigir a la página de inicio de sesión
-        Else
-            lblEmail.Text = Session("UsuarioEmail")
-            lblNombre.Text = Session("UsuarioNombre") + " " + Session("UsuarioApellido")
+        If Not IsPostBack Then
+            Dim email As String = CStr(Session("UsuarioEmail"))
+            Dim roleId As Integer = CInt(Session("RoleId"))
+
+            ' Mapear RoleId -> nombre de rol
+            Dim rol As String = If(roleId = 1, "Paciente",
+                              If(roleId = 2, "Administrador", "Doctor"))
+
+            lblRol.Text = rol
+            lblEmail.Text = email
         End If
     End Sub
-
 End Class

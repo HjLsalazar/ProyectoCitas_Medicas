@@ -4,8 +4,9 @@
 
     <%-- Saludo y datos del usuario tomados desde sesión  --%>
   Bienvenido(a):
-  <asp:Label ID="lblNombre" runat="server" Text=""></asp:Label>
-    <asp:Label ID="lblEmail" runat="server" Text=""></asp:Label>
+  <asp:Label ID="lblRol" runat="server" />
+  &nbsp;–&nbsp;
+  <asp:Label ID="lblEmail" runat="server" />
 
     <%-- Estilos del carrusel: altura fija y recorte proporcional --%>
     <style>
