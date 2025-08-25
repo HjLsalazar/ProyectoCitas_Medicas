@@ -7,9 +7,8 @@ Imports LoginRoles.Data
 Public Class Registro
     Inherits System.Web.UI.Page
 
-    ' Carga inicial de la página
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As EventArgs) Handles Me.Load
-        ' Redirigir si ya está logueado
+        ' Si ya hay sesión y es doctor, no puede registrar
         If Session("UsuarioId") IsNot Nothing AndAlso CInt(Session("RoleId")) = 3 Then
             Response.Redirect("Home.aspx", False)
             Context.ApplicationInstance.CompleteRequest()
@@ -17,43 +16,91 @@ Public Class Registro
         End If
 
         If Not IsPostBack Then
-            ' Mostrar u ocultar panel de selección de rol
+            ' Solo el admin ve el selector de rol
             pnlRol.Visible = (Session("UsuarioId") IsNot Nothing AndAlso CInt(Session("RoleId")) = 2)
         End If
     End Sub
 
-    ' Inferir RoleId a partir del email (registro público)
-    Private Function InferRoleFromEmail(email As String) As Integer
-        If String.IsNullOrWhiteSpace(email) Then Return 1
-        Dim e = email.Trim().ToLowerInvariant()
-        If e.Contains("@admin") Then
-            Return 2
-        ElseIf e.Contains("@clinica") Then
-            Return 3
-        Else
-            Return 1
-        End If
-    End Function
-
-    ' Inserta usuario con RoleId
-    Protected Function RegistrarUsuario(usuario As Usuario) As Boolean
+    'delvuelve Role.Nombre obtiene RoleId (0 si no existe)
+    Private Function GetRoleIdByNombre(rolNombre As String) As Integer
         Dim helper As New DatabaseHelper()
 
-        Dim sql As String = "INSERT INTO Usuarios (Email, Pass, Nombre, Apellidos, RoleId)
-                             VALUES (@Email, @Pass, @Nombre, @Apellidos, @RoleId)"
+        ' Leer como Object para poder validar Nothing/DBNull
+        Dim obj As Object = helper.ExecuteScalar(Of Object)(
+        "SELECT RoleId FROM Roles WHERE Nombre = @n",
+        New List(Of SqlParameter) From {helper.CreateParameter("@n", rolNombre)}
+    )
 
-        Dim parameters As New List(Of SqlParameter) From {
-            New SqlParameter("@Email", usuario.Email),
-            New SqlParameter("@Pass", usuario.Pass),
-            New SqlParameter("@Nombre", usuario.Nombre),
-            New SqlParameter("@Apellidos", If(usuario.Apellidos, String.Empty)),
-            New SqlParameter("@RoleId", usuario.RoleId)
-        }
-
-        Return helper.ExecuteNonQuery(sql, parameters)
+        If obj Is Nothing OrElse Convert.IsDBNull(obj) Then Return 0
+        Return Convert.ToInt32(obj)
     End Function
 
-    ' Evento del botón Registrar
+    ' INSERTA USUARIO Y DEVUELVE SU ID (0 si error)
+    Private Function InsertUsuarioYDevolverId(u As Usuario) As Integer
+        Dim helper As New DatabaseHelper()
+        Dim sql As String =
+"INSERT INTO Usuarios (Email, Pass, Nombre, Apellidos, RoleId)
+ OUTPUT INSERTED.ID
+ VALUES (@Email, @Pass, @Nombre, @Apellidos, @RoleId);"
+
+        Dim pars As New List(Of SqlParameter) From {
+        New SqlParameter("@Email", u.Email),
+        New SqlParameter("@Pass", u.Pass),
+        New SqlParameter("@Nombre", u.Nombre),
+        New SqlParameter("@Apellidos", If(u.Apellidos, String.Empty)),
+        New SqlParameter("@RoleId", u.RoleId)
+    }
+
+        ' lee como Object para poder validar Nothing/DBNull
+        Dim obj As Object = helper.ExecuteScalar(Of Object)(sql, pars)
+        If obj Is Nothing OrElse Convert.IsDBNull(obj) Then Return 0
+        Return Convert.ToInt32(obj)
+    End Function
+
+
+    ' CREA FILA EN DOCTORES (si no existe)
+    Private Sub InsertDoctorSiCorresponde(nombre As String, email As String)
+        Try
+            Dim helper As New DatabaseHelper()
+            ' Usamos email como único identificador
+            Dim sql As String =
+"IF NOT EXISTS (SELECT 1 FROM Doctores WHERE Correo = @Correo)
+   INSERT INTO Doctores (Nombre, Especialidad, Correo, Telefono)
+   VALUES (@Nombre, N'General', @Correo, N'');"
+
+            Dim pars As New List(Of SqlParameter) From {
+                New SqlParameter("@Nombre", nombre),
+                New SqlParameter("@Correo", email)
+            }
+            helper.ExecuteNonQuery(sql, pars)
+        Catch
+            ' Si falla por duplicado, lo ignoramos
+        End Try
+    End Sub
+
+
+    ' CREA FILA EN PACIENTES (si no existe)
+    Private Sub InsertPacienteSiCorresponde(usuarioId As Integer)
+        Try
+            Dim helper As New DatabaseHelper()
+            Dim cedula As String = "AUTO-" & usuarioId.ToString()
+
+            Dim sql As String =
+"IF NOT EXISTS (SELECT 1 FROM Pacientes WHERE UsuarioId = @U)
+   INSERT INTO Pacientes (UsuarioId, Cedula, Telefono, Direccion)
+   VALUES (@U, @Ced, N'', N'');"
+
+            Dim pars As New List(Of SqlParameter) From {
+                New SqlParameter("@U", usuarioId),
+                New SqlParameter("@Ced", cedula)
+            }
+            helper.ExecuteNonQuery(sql, pars)
+        Catch
+            ' Si falla por duplicado, lo ignoramos
+        End Try
+    End Sub
+
+    ' Evento click del botón Registrar
     Protected Sub btnRegistrar_Click(sender As Object, e As EventArgs) Handles btnRegistrar.Click
         Dim email As String = txtEmail.Text.Trim()
         Dim nombre As String = txtNombre.Text.Trim()
@@ -65,22 +112,20 @@ Public Class Registro
             Exit Sub
         End If
 
+        ' Encriptar contraseña
         Dim wrapper As New Simple3Des("claveclavecita")
         Dim password As String = wrapper.EncryptData(pass)
 
-        ' Determinar rol
+        ' Determinar nombre del rol
         Dim rolNombre As String
-
         If pnlRol.Visible Then
-            ' Registro interno: por selección del admin
             Select Case ddlRol.SelectedValue
                 Case "2" : rolNombre = "Administrador"
                 Case "3" : rolNombre = "Doctor"
                 Case Else : rolNombre = "Paciente"
             End Select
         Else
-            ' Registro público: inferir por email
-            Dim eLower As String = email.ToLowerInvariant()
+            Dim eLower = email.ToLowerInvariant()
             If eLower.Contains("@admin") Then
                 rolNombre = "Administrador"
             ElseIf eLower.Contains("@clinica") Then
@@ -90,44 +135,42 @@ Public Class Registro
             End If
         End If
 
-        ' Obtener RoleId real desde la tabla Roles
-        Dim helper As New DatabaseHelper()
-        Dim realRoleIdObj As Object = helper.ExecuteScalar(Of Integer)(
-            "SELECT RoleId FROM Roles WHERE Nombre = @n",
-            New List(Of SqlParameter) From {helper.CreateParameter("@n", rolNombre)}
-        )
-
-        ' Validar que el rol exista
-        If realRoleIdObj Is Nothing OrElse realRoleIdObj Is DBNull.Value Then
-            lblError.Text = "El rol '" & rolNombre & "' no existe en la tabla Roles. Verifica el seed de Roles."
+        ' Obtener RoleId
+        Dim roleId As Integer = GetRoleIdByNombre(rolNombre)
+        If roleId = 0 Then
+            lblError.Text = $"El rol '{rolNombre}' no existe en la tabla Roles."
             lblError.Visible = True
             Exit Sub
         End If
 
-        ' Convertir a Integer
-        Dim realRoleId As Integer = CInt(realRoleIdObj)
-
-        '  Crear y registrar usuario 
-        Dim Usuario As New Usuario() With {
+        ' Insertar en Usuarios y obtener ID
+        Dim u As New Usuario With {
             .Nombre = nombre,
             .Apellidos = "",
             .Email = email,
             .Pass = password,
-            .RoleId = realRoleId
+            .RoleId = roleId
         }
 
-        If RegistrarUsuario(Usuario) Then
-            Response.Redirect("Login.aspx", False)
-            Context.ApplicationInstance.CompleteRequest()
-            Return
-        Else
-            ' Error al insertar
+        Dim nuevoUsuarioId As Integer = InsertUsuarioYDevolverId(u)
+        If nuevoUsuarioId <= 0 Then
             ScriptManager.RegisterStartupScript(Me, Me.GetType(),
                 "ServerControlScript",
                 "Swal.fire('Error al registrar el usuario. Inténtalo de nuevo.');", True)
             lblError.Text = "Error al registrar el usuario. Inténtalo de nuevo."
             lblError.Visible = True
+            Exit Sub
         End If
-    End Sub
 
+        ' Crear fila en Doctores o Pacientes si corresponde
+        If rolNombre = "Doctor" Then
+            InsertDoctorSiCorresponde(nombre, email)
+        ElseIf rolNombre = "Paciente" Then
+            InsertPacienteSiCorresponde(nuevoUsuarioId)
+        End If
+
+        ' Registro exitoso
+        Response.Redirect("Login.aspx", False)
+        Context.ApplicationInstance.CompleteRequest()
+    End Sub
 End Class

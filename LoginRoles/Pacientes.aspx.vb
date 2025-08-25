@@ -34,16 +34,16 @@ Public Class Pacientes
         Dim roleId = CInt(Session("RoleId"))
         Dim usuarioId = CInt(Session("UsuarioId"))
 
-        If roleId = 2 OrElse roleId = 3 Then
-            ' Admin y Doctor: todos los pacientes
+        ' Admin, Doctor y Paciente ven TODOS
+        If roleId = 1 OrElse roleId = 2 OrElse roleId = 3 Then
             gvPacientes.DataSource = _repo.GetAll()
         Else
-            ' Paciente: sólo sus datos
             gvPacientes.DataSource = _repo.GetByUsuarioId(usuarioId)
         End If
 
         gvPacientes.DataBind()
     End Sub
+
 
     ' Crear nuevo paciente: Sólo Admin
     Protected Sub btnAgregar_Click(sender As Object, e As EventArgs) Handles btnAgregar.Click

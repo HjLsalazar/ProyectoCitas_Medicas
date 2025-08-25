@@ -24,10 +24,14 @@
         <!-- =============== USUARIOS =============== -->
         <div class="tab-pane fade show active" id="pane-usuarios" role="tabpanel">
             <div class="row g-2 mb-3">
-                <div class="col-md-3"><asp:TextBox ID="txtUEmail" runat="server" CssClass="form-control" placeholder="Email" /></div>
-                <div class="col-md-2"><asp:TextBox ID="txtUPass" runat="server" CssClass="form-control" TextMode="Password" placeholder="Password" /></div>
-                <div class="col-md-2"><asp:TextBox ID="txtUNombre" runat="server" CssClass="form-control" placeholder="Nombre" /></div>
-                <div class="col-md-2"><asp:TextBox ID="txtUApellidos" runat="server" CssClass="form-control" placeholder="Apellidos" /></div>
+                <div class="col-md-3">
+                    <asp:TextBox ID="txtUEmail" runat="server" CssClass="form-control" placeholder="Email" /></div>
+                <div class="col-md-2">
+                    <asp:TextBox ID="txtUPass" runat="server" CssClass="form-control" TextMode="Password" placeholder="Password" /></div>
+                <div class="col-md-2">
+                    <asp:TextBox ID="txtUNombre" runat="server" CssClass="form-control" placeholder="Nombre" /></div>
+                <div class="col-md-2">
+                    <asp:TextBox ID="txtUApellidos" runat="server" CssClass="form-control" placeholder="Apellidos" /></div>
                 <div class="col-md-2">
                     <asp:DropDownList ID="ddlURol" runat="server" CssClass="form-select">
                         <asp:ListItem Text="Paciente" Value="1" Selected="True" />
@@ -63,10 +67,14 @@
                 <div class="col-md-3">
                     <asp:DropDownList ID="ddlPUsuarios" runat="server" CssClass="form-select"></asp:DropDownList>
                 </div>
-                <div class="col-md-2"><asp:TextBox ID="txtPCedula" runat="server" CssClass="form-control" placeholder="Cédula" /></div>
-                <div class="col-md-2"><asp:TextBox ID="txtPTelefono" runat="server" CssClass="form-control" placeholder="Teléfono" /></div>
-                <div class="col-md-4"><asp:TextBox ID="txtPDireccion" runat="server" CssClass="form-control" placeholder="Dirección" /></div>
-                <div class="col-md-1"><asp:Button ID="btnPAgregar" runat="server" CssClass="btn btn-primary w-100" Text="Agregar" /></div>
+                <div class="col-md-2">
+                    <asp:TextBox ID="txtPCedula" runat="server" CssClass="form-control" placeholder="Cédula" /></div>
+                <div class="col-md-2">
+                    <asp:TextBox ID="txtPTelefono" runat="server" CssClass="form-control" placeholder="Teléfono" /></div>
+                <div class="col-md-4">
+                    <asp:TextBox ID="txtPDireccion" runat="server" CssClass="form-control" placeholder="Dirección" /></div>
+                <div class="col-md-1">
+                    <asp:Button ID="btnPAgregar" runat="server" CssClass="btn btn-primary w-100" Text="Agregar" /></div>
             </div>
 
             <asp:GridView ID="gvPacientesAdmin" runat="server" CssClass="table table-striped"
@@ -92,11 +100,16 @@
         <!-- =============== DOCTORES =============== -->
         <div class="tab-pane fade" id="pane-doctores" role="tabpanel">
             <div class="row g-2 mb-3">
-                <div class="col-md-3"><asp:TextBox ID="txtDNombre" runat="server" CssClass="form-control" placeholder="Nombre" /></div>
-                <div class="col-md-3"><asp:TextBox ID="txtDEspecialidad" runat="server" CssClass="form-control" placeholder="Especialidad" /></div>
-                <div class="col-md-3"><asp:TextBox ID="txtDCorreo" runat="server" CssClass="form-control" placeholder="Correo" /></div>
-                <div class="col-md-2"><asp:TextBox ID="txtDTelefono" runat="server" CssClass="form-control" placeholder="Teléfono" /></div>
-                <div class="col-md-1"><asp:Button ID="btnDAgregar" runat="server" CssClass="btn btn-primary w-100" Text="Agregar" /></div>
+                <div class="col-md-3">
+                    <asp:TextBox ID="txtDNombre" runat="server" CssClass="form-control" placeholder="Nombre" /></div>
+                <div class="col-md-3">
+                    <asp:TextBox ID="txtDEspecialidad" runat="server" CssClass="form-control" placeholder="Especialidad" /></div>
+                <div class="col-md-3">
+                    <asp:TextBox ID="txtDCorreo" runat="server" CssClass="form-control" placeholder="Correo" /></div>
+                <div class="col-md-2">
+                    <asp:TextBox ID="txtDTelefono" runat="server" CssClass="form-control" placeholder="Teléfono" /></div>
+                <div class="col-md-1">
+                    <asp:Button ID="btnDAgregar" runat="server" CssClass="btn btn-primary w-100" Text="Agregar" /></div>
             </div>
 
             <asp:GridView ID="gvDoctoresAdmin" runat="server" CssClass="table table-striped"
@@ -125,27 +138,27 @@
                 <div class="col-md-3">
                     <asp:DropDownList ID="ddlCDoctor" runat="server" CssClass="form-select"></asp:DropDownList>
                 </div>
-                <div class="col-md-2"><asp:TextBox ID="txtCFechaHora" runat="server" CssClass="form-control" placeholder="AAAA-MM-DD HH:MM" /></div>
-                <div class="col-md-2"><asp:TextBox ID="txtCDuracion" runat="server" CssClass="form-control" placeholder="Min" /></div>
-                <div class="col-md-1"><asp:TextBox ID="txtCMotivo" runat="server" CssClass="form-control" placeholder="Motivo" /></div>
-                <div class="col-md-1"><asp:Button ID="btnCAgregar" runat="server" CssClass="btn btn-primary w-100" Text="Agregar" /></div>
+                <div class="col-md-2">
+                    <asp:TextBox ID="txtCFechaHora" runat="server" CssClass="form-control" placeholder="AAAA-MM-DD HH:MM" /></div>
+                <div class="col-md-2">
+                    <asp:TextBox ID="txtCDuracion" runat="server" CssClass="form-control" placeholder="Min" /></div>
+                <div class="col-md-1">
+                    <asp:TextBox ID="txtCMotivo" runat="server" CssClass="form-control" placeholder="Motivo" /></div>
+                <div class="col-md-1">
+                    <asp:Button ID="btnCAgregar" runat="server" CssClass="btn btn-primary w-100" Text="Agregar" /></div>
             </div>
-
-            <asp:GridView ID="gvCitasAdmin" runat="server" CssClass="table table-striped"
-                AutoGenerateColumns="False" DataKeyNames="CitaId"
-                OnRowEditing="gvCitasAdmin_RowEditing"
-                OnRowCancelingEdit="gvCitasAdmin_RowCancelingEdit"
-                OnRowUpdating="gvCitasAdmin_RowUpdating"
-                OnRowDeleting="gvCitasAdmin_RowDeleting">
+            <asp:GridView ID="gvCitasAdmin" runat="server" AutoGenerateColumns="False"
+                DataKeyNames="CitaId">
                 <Columns>
                     <asp:BoundField DataField="CitaId" HeaderText="ID" ReadOnly="True" />
                     <asp:BoundField DataField="FechaHora" HeaderText="Fecha/Hora" />
-                    <asp:BoundField DataField="DuracionMinutos" HeaderText="Min" />
+                    <asp:BoundField DataField="Min" HeaderText="Min" />
                     <asp:BoundField DataField="Motivo" HeaderText="Motivo" />
                     <asp:BoundField DataField="Estado" HeaderText="Estado" />
-                    <asp:BoundField DataField="Doctor" HeaderText="Doctor" ReadOnly="true" />
-                    <asp:BoundField DataField="Especialidad" HeaderText="Especialidad" ReadOnly="true" />
-                    <asp:CommandField ShowEditButton="true" ShowDeleteButton="true" />
+                    <asp:BoundField DataField="Doctor" HeaderText="Doctor" />
+                    <asp:BoundField DataField="Especialidad" HeaderText="Especialidad" />
+                    <asp:BoundField DataField="Paciente" HeaderText="Paciente" ReadOnly="True" />
+                    <asp:CommandField ShowEditButton="True" ShowDeleteButton="True" />
                 </Columns>
             </asp:GridView>
         </div>

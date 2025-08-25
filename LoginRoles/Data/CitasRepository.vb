@@ -1,5 +1,4 @@
-﻿
-Imports System.Data
+﻿Imports System.Data
 Imports System.Data.SqlClient
 Imports LoginRoles.Helpers
 
@@ -9,31 +8,39 @@ Namespace Data
         ' Repositorio para gestionar citas médicas
         Private ReadOnly db As New DatabaseHelper()
 
-        ' Obtener lista de citas según rol:
+
         Public Function GetList(roleId As Integer, usuarioId As Integer) As DataTable
-            If roleId = 2 Then ' Admin ve todas
-                Dim sql = "SELECT C.CitaId, C.FechaHora, C.DuracionMinutos, C.Motivo, C.Estado,
-                                  P.PacienteId, P.Cedula,
-                                  U.Nombre + ' ' + U.Apellidos AS Paciente,
-                                  D.DoctorId, D.Nombre AS Doctor, D.Especialidad
-                           FROM Citas C
-                           INNER JOIN Pacientes P ON P.PacienteId=C.PacienteId
-                           INNER JOIN Usuarios U ON U.Id=P.UsuarioId
-                           INNER JOIN Doctores D ON D.DoctorId=C.DoctorId
-                           ORDER BY C.FechaHora DESC"
-                Return db.ExecuteQuery(sql)
-            Else ' Doctor ve solo sus citas
-                Dim sql = "SELECT C.CitaId, C.FechaHora, C.DuracionMinutos, C.Motivo, C.Estado,
-                                  D.DoctorId, D.Nombre AS Doctor, D.Especialidad
-                           FROM Citas C
-                           INNER JOIN Pacientes P ON P.PacienteId=C.PacienteId
-                           INNER JOIN Usuarios U ON U.Id=P.UsuarioId
-                           INNER JOIN Doctores D ON D.DoctorId=C.DoctorId
-                           WHERE U.Id=@UsuarioId
-                           ORDER BY C.FechaHora DESC"
-                Dim p = New List(Of SqlParameter) From {db.CreateParameter("@UsuarioId", usuarioId)}
-                Return db.ExecuteQuery(sql, p)
-            End If
+            Dim baseSelect As String =
+            "SELECT 
+                c.CitaId,
+                c.FechaHora,
+                c.DuracionMinutos AS Min,
+                c.Motivo,
+                c.Estado,
+                d.Nombre        AS Doctor,
+                d.Especialidad,
+                (u.Nombre + ' ' + u.Apellidos) AS Paciente
+            FROM dbo.Citas c
+            INNER JOIN dbo.Doctores  d ON d.DoctorId  = c.DoctorId
+            INNER JOIN dbo.Pacientes p ON p.PacienteId = c.PacienteId
+            INNER JOIN dbo.Usuarios  u ON u.ID        = p.UsuarioId"
+
+            Dim sql As String
+            Dim pars As List(Of SqlParameter) = Nothing
+
+            Select Case roleId
+                Case 2, 3
+                    sql = baseSelect & " ORDER BY c.FechaHora DESC"
+
+                Case 1    ' Paciente: sólo sus citas (por UsuarioId del paciente)
+                    sql = baseSelect & " WHERE p.UsuarioId = @uid ORDER BY c.FechaHora DESC"
+                    pars = New List(Of SqlParameter) From {db.CreateParameter("@uid", usuarioId)}
+
+                Case Else
+                    sql = baseSelect & " WHERE 1=0"
+            End Select
+
+            Return db.ExecuteQuery(sql, pars)
         End Function
 
         ' Verificar si el doctor está disponible en la fecha y hora dada
@@ -46,6 +53,7 @@ Namespace Data
             Dim n = db.ExecuteScalar(Of Integer)(sql, p)
             Return n = 0
         End Function
+
         ' Insertar nueva cita
         Public Function Insert(pacienteId As Integer, doctorId As Integer, fechaHora As DateTime,
                                duracionMin As Integer, motivo As String, estado As String) As Boolean
@@ -92,7 +100,6 @@ Namespace Data
             Return db.ExecuteNonQuery(sql, p)
         End Function
 
-
         ' Obtener DoctorId asociado a una cita
         Public Function GetDoctorIdByCita(citaId As Integer) As Integer
             Dim sql = "SELECT DoctorId FROM Citas WHERE CitaId=@Id"
@@ -101,5 +108,17 @@ Namespace Data
             If dt.Rows.Count = 0 Then Return 0
             Return CInt(dt.Rows(0)("DoctorId"))
         End Function
+
+        ' Marcar una cita como Cancelada (para el paciente dueño de la cita)
+        Public Function Cancelar(citaId As Integer, pacienteId As Integer) As Boolean
+            Return db.ExecuteNonQuery(
+                "UPDATE Citas SET Estado='Cancelada' WHERE CitaId=@Id AND PacienteId=@Pac",
+                New List(Of SqlParameter) From {
+                    db.CreateParameter("@Id", citaId),
+                    db.CreateParameter("@Pac", pacienteId)
+                }
+            )
+        End Function
+
     End Class
 End Namespace

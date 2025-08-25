@@ -1,6 +1,7 @@
 ﻿Imports System.Data
 Imports System.Web.UI.WebControls
 Imports LoginRoles.Data
+
 Partial Class Citas
     Inherits System.Web.UI.Page
 
@@ -31,14 +32,11 @@ Partial Class Citas
 
         ' Mostrar u ocultar panel de nueva cita según rol
         Dim r As Integer = CInt(Session("RoleId"))
-
-        ' Solo Paciente (3) no ve el panel
         pnlNueva.Visible = (r = 1 OrElse r = 2)
 
         If Not IsPostBack Then
             CargarDoctores()
             BindGrid()
-
         End If
     End Sub
 
@@ -59,8 +57,8 @@ Partial Class Citas
         Dim uid As Integer = UsuarioId
         Dim dt As DataTable
 
+        ' Doctor: ver todas las citas (como admin)
         If r = 3 Then
-            ' Doctor: ver todas las citas (como admin)
             dt = _repoCita.GetList(2, 0)
         Else
             ' Paciente/Admin: lógica actual
@@ -70,7 +68,7 @@ Partial Class Citas
         gvCitas.DataSource = dt
         gvCitas.DataBind()
 
-        ' Solo Admin(2) y Paciente(1) pueden ver Editar/Eliminar
+        ' Solo Admin(2) y Paciente(1) pueden ver Editar/Eliminar (columna estándar de CommandField)
         If gvCitas.Columns.Count > 0 Then
             gvCitas.Columns(gvCitas.Columns.Count - 1).Visible = (r = 1 OrElse r = 2)
         End If
@@ -90,7 +88,6 @@ Partial Class Citas
             Dim dur = Integer.Parse(txtDuracion.Text.Trim())
             Dim motivo = txtMotivo.Text.Trim()
 
-            ' Validaciones básicas
             Dim ok = _repoCita.Insert(pacienteId, doctorId, fecha, dur, motivo, "Pendiente")
             If ok Then
                 lblInfo.Text = "Cita reservada."
@@ -129,7 +126,6 @@ Partial Class Citas
             Dim dtPac = _repoPaciente.GetByUsuarioId(UsuarioId)
             Dim pacienteId = If(dtPac.Rows.Count > 0, CInt(dtPac.Rows(0)("PacienteId")), 0)
 
-            ' Validaciones básicas
             Dim ok = _repoCita.Update(
                 id,
                 pacienteId,
@@ -160,25 +156,56 @@ Partial Class Citas
         End Try
     End Sub
 
+    ' ====== NUEVO: Mostrar/ocultar botón Cancelar (solo Paciente y si no está Cancelada) ======
+    Protected Sub gvCitas_RowDataBound(sender As Object, e As GridViewRowEventArgs) Handles gvCitas.RowDataBound
+        If e.Row.RowType = DataControlRowType.DataRow Then
+            Dim btn = TryCast(e.Row.FindControl("btnCancelar"), LinkButton)
+            If btn IsNot Nothing Then
+                Dim esPaciente As Boolean = (RoleId = 1)
+                Dim estado As String = DataBinder.Eval(e.Row.DataItem, "Estado").ToString()
+                btn.Visible = esPaciente AndAlso Not estado.Equals("Cancelada", StringComparison.OrdinalIgnoreCase)
+            End If
+        End If
+    End Sub
+
+    ' Manejar clic en botón Cancelar
+    ' Ejecutar la cancelación
+    Protected Sub gvCitas_RowCommand(sender As Object, e As GridViewCommandEventArgs) Handles gvCitas.RowCommand
+        If e.CommandName = "Cancelar" AndAlso RoleId = 1 Then  ' <- = (no usar Is)
+            Dim citaId As Integer = Convert.ToInt32(e.CommandArgument)
+
+            ' Obtener PacienteId del usuario logueado
+            Dim dtPac = _repoPaciente.GetByUsuarioId(UsuarioId)
+            If dtPac.Rows.Count = 0 Then Exit Sub
+            Dim pacienteId = CInt(dtPac.Rows(0)("PacienteId"))
+
+            ' Cancelar (solo estado) para esa cita del paciente
+            If _repoCita.Cancelar(citaId, pacienteId) Then
+                BindGrid()
+            End If
+        End If
+    End Sub
+
     ' Limpia los controles del formulario de nueva cita
+    'Necesario arriba del archivo si no lo tienes:
+    'Imports System.Web.UI.WebControls
+
     Private Sub LimpiarFormulario()
-        ' reset del combo de doctores
         ddlDoctores.ClearSelection()
+
         If ddlDoctores.Items.Count > 0 Then
-            Dim it = ddlDoctores.Items.FindByValue("")
-            If it IsNot Nothing Then
-                ddlDoctores.SelectedValue = ""
+            Dim li As ListItem = ddlDoctores.Items.FindByValue("")  ' <- tipado explícito
+
+            If li IsNot Nothing Then
+                ddlDoctores.SelectedValue = ""   ' existe el ítem con valor vacío
             Else
                 ddlDoctores.SelectedIndex = 0
             End If
         End If
 
-        ' limpiar textos
         txtFechaHora.Text = String.Empty
         txtDuracion.Text = String.Empty
         txtMotivo.Text = String.Empty
-
-        ' dejar el foco en el primer control
         ddlDoctores.Focus()
     End Sub
 

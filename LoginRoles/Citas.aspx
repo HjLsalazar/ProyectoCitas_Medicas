@@ -7,7 +7,7 @@
     <asp:Label ID="lblError" runat="server" CssClass="text-danger" Visible="False"></asp:Label>
 
 
-
+    
     <asp:Panel ID="pnlNueva" runat="server" CssClass="mb-3">
         <div class="row g-2">
             <div class="col-md-3">
@@ -34,22 +34,39 @@
             </div>
 
             <div class="col-md-1">
-                <asp:Button ID="btnAgregar" runat="server" CssClass="btn btn-primary w-100" Text="Reservar"  OnClick="btnAgregar_Click"/>
+                <asp:Button ID="btnAgregar" runat="server" CssClass="btn btn-primary w-100" Text="Reservar"
+                    OnClick="btnAgregar_Click" />
             </div>
         </div>
     </asp:Panel>
 
+ 
     <asp:GridView ID="gvCitas" runat="server" CssClass="table table-striped"
         AutoGenerateColumns="False" DataKeyNames="CitaId">
         <Columns>
             <asp:BoundField DataField="CitaId" HeaderText="ID" ReadOnly="True" />
             <asp:BoundField DataField="FechaHora" HeaderText="Fecha/Hora" DataFormatString="{0:yyyy-MM-dd HH:mm}" />
-            <asp:BoundField DataField="DuracionMinutos" HeaderText="Min" />
+            <asp:BoundField DataField="Min" HeaderText="Min" />
             <asp:BoundField DataField="Motivo" HeaderText="Motivo" />
             <asp:BoundField DataField="Estado" HeaderText="Estado" />
-            <asp:BoundField DataField="Doctor" HeaderText="Doctor" />
-            <asp:BoundField DataField="Especialidad" HeaderText="Especialidad" />
+            <asp:BoundField DataField="Doctor" HeaderText="Doctor" ReadOnly="True" />
+            <asp:BoundField DataField="Especialidad" HeaderText="Especialidad" ReadOnly="True" />
+            <asp:BoundField DataField="Paciente" HeaderText="Paciente" ReadOnly="True" />
+
             <asp:CommandField ShowEditButton="True" ShowDeleteButton="True" />
+
+  
+            <asp:TemplateField HeaderText="Acciones">
+                <ItemTemplate>
+                    <asp:LinkButton ID="btnCancelar" runat="server"
+                        Text="Cancelar"
+                        CssClass="link-danger"
+                        CommandName="Cancelar"
+                        CommandArgument='<%# Eval("CitaId") %>'
+                        OnClientClick="return confirm('¿Desea cancelar esta cita?');">
+                    </asp:LinkButton>
+                </ItemTemplate>
+            </asp:TemplateField>
         </Columns>
     </asp:GridView>
 </asp:Content>
